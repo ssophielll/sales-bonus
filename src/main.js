@@ -105,7 +105,7 @@ function analyzeSalesData(data, options) {
 
         seller.top_products = Object.entries(seller.products_sold)
             .map(([sku, quantity]) => ({ sku, quantity }))
-            .sort((a, b) => b.quantity - a.quantity)
+            .sort((a, b) => b.quantity - a.quantity || a.sku.localeCompare(b.sku))
             .slice(0, 10);
     });
  
