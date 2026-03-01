@@ -125,3 +125,9 @@ function analyzeSalesData(data, options) {
 // Итоговый отчет
 const result = analyzeSalesData(data, { calculateRevenue: calculateSimpleRevenue, calculateBonus: calculateBonusByProfit });
 console.log("Итоговый отчёт:", result);
+
+module.exports = {
+    calculateSimpleRevenue,
+    calculateBonusByProfit,
+    analyzeSalesData
+};
