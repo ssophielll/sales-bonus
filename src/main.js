@@ -21,7 +21,7 @@ function calculateBonusByProfit(index, total, seller) {
 
     if (index === total - 1) return 0;
     if (index === 0) return profit * 0.15;
-    if (index <= 2) return profit * 0.10;
+    if (index === 1 || index === 2) return profit * 0.10;
 
     return profit * 0.05;
 }
@@ -36,22 +36,22 @@ function analyzeSalesData(data, options) {
     const { sellers, products, purchase_records } = data;
     if (
         !data
-        || !Array.isArray(data.sellers)
         || !Array.isArray(data.products)
+        || !Array.isArray(data.sellers)
         || !Array.isArray(data.purchase_records)
-        || data.sellers.length === 0
         || data.products.length === 0
+        || data.sellers.length === 0
         || data.purchase_records.length === 0
-        || !options
-        || typeof options.calculateRevenue !== "function"
-        || typeof options.calculateBonus !== "function"
     ) {
-        throw new Error("Некорректные входные данные");
+        throw new Error('Некорректные входные данные');
     }
-
+    
+    if (typeof options !== 'object' || options === null) {
+        throw new Error('Опции не являются объектом');
+    }
     const { calculateRevenue, calculateBonus } = options;
     if (!calculateRevenue || !calculateBonus) {
-        throw new Error("Чего-то не хватает");
+        throw new Error('Чего-то не хватает');
     }
     
     const sellerStats = data.sellers.map(seller => ({
@@ -105,7 +105,7 @@ function analyzeSalesData(data, options) {
 
         seller.top_products = Object.entries(seller.products_sold)
             .map(([sku, quantity]) => ({ sku, quantity }))
-            .sort((a, b) => b.quantity - a.quantity || a.sku.localeCompare(b.sku))
+            .sort((a, b) => b.quantity - a.quantity)
             .slice(0, 10);
     });
  
