@@ -50,13 +50,13 @@ function analyzeSalesData(data, options) {
         throw new Error('Опции не являются объектом');
     }
     const { calculateRevenue, calculateBonus } = options;
-    if (!calculateRevenue || !calculateBonus) {
+    if (typeof calculateRevenue !== 'function' || typeof calculateBonus !== 'function') {
         throw new Error('Чего-то не хватает');
     }
     
     const sellerStats = data.sellers.map(seller => ({
         id: seller.id,
-        name: `${seller.first_name} ${seller.last_name}`,
+        name: `${seller.first_name || ''} ${seller.last_name || ''}`.trim() || 'Unknown',
         revenue: 0,
         profit: 0,
         sales_count: 0,
@@ -77,21 +77,22 @@ function analyzeSalesData(data, options) {
         const seller = sellerIndex[record.seller_id];
         if (!seller) return;
         
-        if (!Array.isArray(record.items)) return;
-        record.items.forEach(item => {
-            const product = productIndex[item.sku];
-            const cost = product ? product.purchase_price * item.quantity : 0;
-            const revenue = calculateRevenue(item, product);
-            const profit = revenue - cost;
+        seller.sales_count += 1;
+        seller.revenue += record.total_amount;
 
-            seller.revenue += revenue;
-            seller.profit += profit;
+        if (Array.isArray(record.items)) {
+            record.items.forEach(item => {
+                const product = productIndex[item.sku];
+                const cost = product ? product.purchase_price * item.quantity : 0;
+                const revenue = calculateRevenue(item, product);
+                const profit = revenue - cost;
 
-            if (!seller.products_sold[item.sku]) {
-                seller.products_sold[item.sku] = 0;
-            }
-            seller.products_sold[item.sku] += item.quantity;
-        });
+                if (!seller.products_sold[item.sku]) {
+                    seller.products_sold[item.sku] = 0;
+                }
+                seller.products_sold[item.sku] += item.quantity;
+            });
+        }
     });
 
     console.log(sellerStats); // Обработка чеков
